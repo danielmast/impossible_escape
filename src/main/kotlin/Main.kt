@@ -2,12 +2,12 @@ import java.util.*
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
-const val DIM_EXP: Int = 4 // Only edit this value
+const val EXP: Int = 4 // Only edit this value
 
-val dim = 2.0.pow(DIM_EXP).toInt()
-val n = pow(2, dim)
+val n = pow(2, EXP)
+val v = pow(2, n)
 
-val vertices = Array(n) { i -> Vertex(i) }
+val vertices = Array(v) { i -> Vertex(i) }
 val history: Stack<Vertex> = Stack()
 
 fun main() {
@@ -21,7 +21,7 @@ fun main() {
 fun colorGraph() {
     history.push(vertices[0].apply { color = 0 })
 
-    while (history.size < n) {
+    while (history.size < v) {
         val colorlessNeighbour = history.peek().neighbours().first { it.color == null }
 
         if (colorlessNeighbour.allowedColors().isNotEmpty()) {
@@ -44,7 +44,7 @@ fun validateGraph() {
         if (vertex.color == null) {
             throw IllegalStateException("$vertex has no color")
         }
-        if (vertex.neighbours().map { it.color }.distinct().size != dim) {
+        if (vertex.neighbours().map { it.color }.distinct().size != n) {
             throw IllegalStateException("$vertex has illegal neighbours")
         }
     }
@@ -53,18 +53,18 @@ fun validateGraph() {
 fun printResults(elapsed: Long) {
     println("Vertices:")
     vertices.forEach{ println(it) }
-    println("Dim: $dim, N = $n ($elapsed ms)")
+    println("N: $n, V = $v ($elapsed ms)")
 }
 
 data class Vertex(
-        val key: Int,
+        val index: Int,
         var color: Int? = null
 ) {
     fun neighbours() =
-        (0 until dim).map { key xor pow(2, it) }.map{ vertices[it] }
+        (0 until n).map { index xor pow(2, it) }.map{ vertices[it] }
 
     fun allowedColors() =
-            (0 until dim).minus(colorsOfSecondDegreeNeighbours())
+            (0 until n).minus(colorsOfSecondDegreeNeighbours())
 
     private fun colorsOfSecondDegreeNeighbours() =
             neighbours().flatMap { it.neighbours() }.distinct().filter { it != this }.map { it.color }.sortedBy { it }
