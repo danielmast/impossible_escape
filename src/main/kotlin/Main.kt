@@ -8,7 +8,7 @@ val n = pow2(EXP)
 
 fun main() {
     val board = getBoardFromFile()
-    val key = Random().nextInt(n)
+    val key = getKeyFromFile()
     println("Warden hides key at position $key")
     actionPrisoner1(board, key)
     val foundKey = actionPrisoner2(board)
@@ -16,7 +16,7 @@ fun main() {
 }
 
 fun getBoardFromFile(): BitSet =
-    object {}.javaClass.getResource("board.csv").readText().replace("\n", "").let { content ->
+    object {}.javaClass.getResource("board.txt").readText().replace("\n", "").let { content ->
         if (content.length != n) throw IllegalArgumentException("Board should consist of $n bits")
         BitSet(n).apply {
             content.forEachIndexed { index, bit ->
@@ -26,6 +26,9 @@ fun getBoardFromFile(): BitSet =
     }
 
 fun getRandomBoard() = IntArray(n) { it }.filter { Random().nextBoolean() }.toIntArray().toBitSet()
+
+fun getKeyFromFile(): Int =
+    object {}.javaClass.getResource("key.txt").readText().replace("\n", "").toInt()
 
 fun actionPrisoner1(board: BitSet, key: Int) {
     val parity = board.parity()
