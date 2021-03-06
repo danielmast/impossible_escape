@@ -7,7 +7,7 @@ const val EXP: Int = 6 // Only edit this value
 val n = pow2(EXP)
 
 fun main() {
-    val board = getRandomBoard()
+    val board = getBoardFromFile()
     val key = Random().nextInt(n)
     println("Warden hides key at position $key")
     actionPrisoner1(board, key)
@@ -15,10 +15,15 @@ fun main() {
     println("Prisoner 2 guesses that key is at position $foundKey")
 }
 
-fun getFixedBoard() = intArrayOf(
-    2, 4, 5, 14, 16, 20, 24, 25, 30, 31, 32, 34, 36, 39,
-    41, 44, 45, 47, 48, 50, 52, 53, 56, 57, 60, 61, 63
-).toBitSet()
+fun getBoardFromFile(): BitSet =
+    object {}.javaClass.getResource("board.csv").readText().replace("\n", "").let { content ->
+        if (content.length != n) throw IllegalArgumentException("Board should consist of $n bits")
+        BitSet(n).apply {
+            content.forEachIndexed { index, bit ->
+                if (bit == '1') set(index)
+            }
+        }
+    }
 
 fun getRandomBoard() = IntArray(n) { it }.filter { Random().nextBoolean() }.toIntArray().toBitSet()
 
