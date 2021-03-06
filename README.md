@@ -30,4 +30,6 @@ Each vertex represents a board state. All vertices together represent all possib
  
 Instead of heads and tails, let's use 0 and 1. For the puzzle, the rows and columns are irrelevant. The state can be represented as follows: `1011110100111010`. Translating this from binary to decimal gives the integer `48442`. Let's say we flip the coin at B3. The state now becomes `1011100100111010`, or `47418`. This integer is used as the vertex index. Two vertices are neighbours when the hamming distance between their (binary) indices is equal to 1.
 
-In fact, I am not really constructing a graph in the code. Instead, I store all vertices in an array with size `2^n`. The vertex index allows efficient lookup. 
+In fact, I do not really construct a graph in the code. Instead, I store all vertices in an array with size `2^n`. This saves a lot of references. The vertex index allows efficient lookup.
+
+When the warden hides the key beneath the coin at for example C2, prisoner 1 needs to flip one coin in order to bring the board in a state such that prisoner 2 can tell where the key is hidden. A vertex color encodes a cell on the board. Each color is represented as an integer between 0 and `n-1`, where A4 corresponds with 0 and D1 corresponds with 15. From vertex `48442`, we have to travel to the neighbour with color 10 (C2) and check its index. Then, prisoner 1 flips the coin that makes the board match with that index. Finally, prisoner 2 looks up the color of the vertex at the state index and finds the key at the location that corresponds with the color.
