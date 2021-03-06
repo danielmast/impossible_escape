@@ -1,11 +1,12 @@
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
 const val EXP: Int = 4 // Only edit this value
 
-val n = pow(2, EXP)
-val v = pow(2, n)
+val n = pow2(EXP)
+val v = pow2(n)
 
 val vertices = Array(v) { i -> Vertex(i) }
 val history: Stack<Vertex> = Stack()
@@ -61,7 +62,7 @@ data class Vertex(
         var color: Int? = null
 ) {
     fun neighbours() =
-        (0 until n).map { index xor pow(2, it) }.map{ vertices[it] }
+        (0 until n).map { index xor pow2(it) }.map{ vertices[it] }
 
     fun allowedColors() =
             (0 until n).minus(colorsOfSecondDegreeNeighbours())
@@ -70,4 +71,41 @@ data class Vertex(
             neighbours().flatMap { it.neighbours() }.distinct().filter { it != this }.map { it.color }.sortedBy { it }
 }
 
-fun pow(base: Int, exp: Int) = base.toDouble().pow(exp).toInt()
+fun pow2(exp: Int) = 2.0.pow(exp).toInt()
+
+fun log2(x: Int) = x.let {
+    if (!it.isPowerOfTwo()) throw IllegalArgumentException("$it should be power of two")
+    kotlin.math.log2(it.toDouble()).toInt()
+}
+
+fun Int.isPowerOfTwo() = (this and (this - 1)) == 0
+
+fun BitSet.parity(): BitSet {
+    val result = BitSet(log2(this.size()))
+
+    (0 until this.size()).map { index ->
+        val bit = this.get(index)
+        if (bit) {
+            (0 until log2(this.size())).map { region ->
+                if (index.isInRegion(region)) result.flip(region)
+            }
+        }
+    }
+    return result
+}
+
+fun Int.isInRegion(region: Int) = this.toBitSet().get(region)
+
+fun Int.toBitSet(): BitSet {
+    val result = BitSet()
+    var index = 0
+    var value = this
+    while (value != 0) {
+        if (value % 2 != 0) {
+            result.set(index)
+        }
+        index++
+        value = value shr 1
+    }
+    return result
+}
