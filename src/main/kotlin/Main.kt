@@ -1,75 +1,36 @@
 import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.pow
-import kotlin.system.measureTimeMillis
 
-const val EXP: Int = 4 // Only edit this value
+const val EXP: Int = 6 // Only edit this value
 
 val n = pow2(EXP)
-val v = pow2(n)
-
-val vertices = Array(v) { i -> Vertex(i) }
-val history: Stack<Vertex> = Stack()
 
 fun main() {
-    val elapsed = measureTimeMillis {
-        colorGraph()
-        validateGraph()
-    }
-    printResults(elapsed)
+    val board = getRandomBoard()
+    val key = Random().nextInt(n)
+    println("Warden hides key at position $key")
+    actionPrisoner1(board, key)
+    val foundKey = actionPrisoner2(board)
+    println("Prisoner 2 guesses that key is at position $foundKey")
 }
 
-fun colorGraph() {
-    history.push(vertices[0].apply { color = 0 })
+fun getFixedBoard() = intArrayOf(
+    2, 4, 5, 14, 16, 20, 24, 25, 30, 31, 32, 34, 36, 39,
+    41, 44, 45, 47, 48, 50, 52, 53, 56, 57, 60, 61, 63
+).toBitSet()
 
-    while (history.size < v) {
-        val colorlessNeighbour = history.peek().neighbours().first { it.color == null }
+fun getRandomBoard() = IntArray(n) { it }.filter { Random().nextBoolean() }.toIntArray().toBitSet()
 
-        if (colorlessNeighbour.allowedColors().isNotEmpty()) {
-            history.push(colorlessNeighbour.apply {
-                color = allowedColors().first()
-            })
-        } else {
-            while (history.peek().let { it.color == it.allowedColors().last() }) {
-                history.pop().apply { color = null }
-            }
-            history.peek().apply {
-                color = allowedColors()[allowedColors().indexOf(color) + 1]
-            }
-        }
-    }
+fun actionPrisoner1(board: BitSet, key: Int) {
+    val parity = board.parity()
+    val diff = parity.copy().apply { xor(key.toBitSet()) }
+    val flipped = diff.toInt()
+    board.flip(flipped)
+    println("Prisoner 1 flipped coin $flipped")
 }
 
-fun validateGraph() {
-    vertices.forEach { vertex ->
-        if (vertex.color == null) {
-            throw IllegalStateException("$vertex has no color")
-        }
-        if (vertex.neighbours().map { it.color }.distinct().size != n) {
-            throw IllegalStateException("$vertex has illegal neighbours")
-        }
-    }
-}
-
-fun printResults(elapsed: Long) {
-    println("Vertices:")
-    vertices.forEach{ println(it) }
-    println("N: $n, V = $v ($elapsed ms)")
-}
-
-data class Vertex(
-        val index: Int,
-        var color: Int? = null
-) {
-    fun neighbours() =
-        (0 until n).map { index xor pow2(it) }.map{ vertices[it] }
-
-    fun allowedColors() =
-            (0 until n).minus(colorsOfSecondDegreeNeighbours())
-
-    private fun colorsOfSecondDegreeNeighbours() =
-            neighbours().flatMap { it.neighbours() }.distinct().filter { it != this }.map { it.color }.sortedBy { it }
-}
+fun actionPrisoner2(board: BitSet) = board.parity().toInt()
 
 fun pow2(exp: Int) = 2.0.pow(exp).toInt()
 
@@ -80,21 +41,7 @@ fun log2(x: Int) = x.let {
 
 fun Int.isPowerOfTwo() = (this and (this - 1)) == 0
 
-fun BitSet.parity(): BitSet {
-    val result = BitSet(log2(this.size()))
-
-    (0 until this.size()).map { index ->
-        val bit = this.get(index)
-        if (bit) {
-            (0 until log2(this.size())).map { region ->
-                if (index.isInRegion(region)) result.flip(region)
-            }
-        }
-    }
-    return result
-}
-
-fun Int.isInRegion(region: Int) = this.toBitSet().get(region)
+fun Int.isInRegion(region: Int) = toBitSet().get(region)
 
 fun Int.toBitSet(): BitSet {
     val result = BitSet()
@@ -106,6 +53,35 @@ fun Int.toBitSet(): BitSet {
         }
         index++
         value = value shr 1
+    }
+    return result
+}
+
+fun IntArray.toBitSet() =
+    BitSet(size).apply {
+        this@toBitSet.forEach { set(it) }
+    }
+
+fun BitSet.copy() = BitSet(size()).apply {
+    (0 until this@copy.size()).forEach {
+        set(it, this@copy.get(it))
+    }
+}
+
+fun BitSet.toInt(): Int =
+    (0 until size()).fold(0) { acc, index ->
+        acc + if (get(index)) pow2(index) else 0 }
+
+fun BitSet.parity(): BitSet {
+    val result = BitSet(log2(size()))
+
+    (0 until size()).map { index ->
+        val bit = get(index)
+        if (bit) {
+            (0 until log2(size())).map { region ->
+                if (index.isInRegion(region)) result.flip(region)
+            }
+        }
     }
     return result
 }

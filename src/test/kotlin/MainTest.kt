@@ -31,13 +31,25 @@ internal class MainTest {
     }
 
     @Test
+    fun `changing a copied BitSet does not change the original`() {
+        val original = intArrayOf(3, 5, 8).toBitSet()
+
+        val copy = original.copy().apply {
+            set(3, false)
+            set(7)
+        }
+
+        val expectedOriginal = intArrayOf(3, 5, 8).toBitSet()
+        val expectedCopy = intArrayOf(5, 7, 8).toBitSet()
+
+        assertEquals(expectedOriginal, original)
+        assertEquals(expectedCopy, copy)
+    }
+
+    @Test
     fun `13 to BitSet equals 1101`() {
         val value = 13
-        val expected = BitSet().apply {
-            set(0)
-            set(2)
-            set(3)
-        }
+        val expected = intArrayOf(0, 2, 3).toBitSet()
         assertEquals(expected, value.toBitSet())
 
     }
@@ -45,9 +57,22 @@ internal class MainTest {
     @Test
     fun `63 to BitSet equals 111111`() {
         val value = 63
-        val expected = BitSet(64)
-        (0 until 6).forEach { expected.set(it) }
+        val expected = IntArray(6) { it }.toBitSet()
         assertEquals(expected, value.toBitSet())
+    }
+
+    @Test
+    fun `1101 to Int equals 13`() {
+        val value = intArrayOf(0, 2, 3).toBitSet()
+        val expected = 13
+        assertEquals(expected, value.toInt())
+    }
+
+    @Test
+    fun `111111 to Int equals 63`() {
+        val expected = 63
+        val value = IntArray(6) { it }.toBitSet()
+        assertEquals(expected, value.toInt())
     }
 
     @Test
@@ -74,34 +99,16 @@ internal class MainTest {
 
     @Test
     fun parity() {
-        val value = BitSet().apply {
-            set(10)
-            set(13)
-            set(20)
-            set(30)
-            set(34)
-            set(45)
-            set(49)
-            set(58)
-            set(62)
-        }
+        val value = intArrayOf(10, 13, 20, 30, 34, 45, 49, 58, 62).toBitSet()
 
-        val expected = BitSet().apply {
-            set(0)
-            set(1)
-            set(2)
-            set(4)
-            set(5)
-        }
+        val expected = intArrayOf(0, 1, 2, 4, 5).toBitSet()
 
         assertEquals(expected, value.parity())
     }
 
     @Test
     fun `board with only the last field set to 1 has parity 111111`() {
-        val value = BitSet().apply {
-            set(63)
-        }
+        val value = intArrayOf(63).toBitSet()
 
         val expected = BitSet().apply {
             (0 until 6).forEach { set(it) }
