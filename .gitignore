@@ -3,3 +3,4 @@
 target/
 src/main/resources/board.txt
 src/main/resources/key.txt
+src/main/resources/mode.txt

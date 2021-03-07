@@ -1,20 +1,15 @@
 import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.pow
-import Mode.*
 import java.io.File
 import kotlin.math.sqrt
 
-const val EXP: Int = 6 // Only edit this value
-val n = pow2(EXP)
-
-val mode = PRISONER_1 // Choose a mode
-enum class Mode { PRISONER_1, PRISONER_2 }
+val n = getBoardFromFile().size()
 
 fun main() {
-    when (mode) {
-        PRISONER_1 -> actionPrisoner1()
-        PRISONER_2 -> actionPrisoner2()
+    when (getModeFromFile()) {
+        1 -> actionPrisoner1()
+        2 -> actionPrisoner2()
     }
 }
 
@@ -38,7 +33,6 @@ fun actionPrisoner2() {
 
 fun getBoardFromFile(): BitSet =
     object {}.javaClass.getResource("board.txt").readText().replace("\n", "").let { content ->
-        if (content.length != n) throw IllegalArgumentException("Board should consist of $n bits")
         BitSet(n).apply {
             content.forEachIndexed { index, bit ->
                 if (bit == '1') set(index)
@@ -53,6 +47,9 @@ fun saveBoardToFile(board: BitSet) {
         }.joinToString("")
     )
 }
+
+fun getModeFromFile(): Int =
+    object {}.javaClass.getResource("mode.txt").readText().replace("\n", "").toInt()
 
 fun getKeyFromFile(): Int =
     object {}.javaClass.getResource("key.txt").readText().replace("\n", "").toInt()
