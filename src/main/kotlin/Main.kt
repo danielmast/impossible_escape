@@ -1,18 +1,39 @@
 import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.pow
+import Mode.*
+import java.io.File
+import kotlin.math.sqrt
 
 const val EXP: Int = 6 // Only edit this value
-
 val n = pow2(EXP)
 
+val mode = PRISONER_1 // Choose a mode
+enum class Mode { PRISONER_1, PRISONER_2 }
+
 fun main() {
-    val board = getBoardFromFile()
-    val key = getKeyFromFile()
-    println("Warden hides key at position $key")
-    actionPrisoner1(board, key)
-    val foundKey = actionPrisoner2(board)
-    println("Prisoner 2 guesses that key is at position $foundKey")
+    when (mode) {
+        PRISONER_1 -> actionPrisoner1()
+        PRISONER_2 -> actionPrisoner2()
+    }
+}
+
+fun actionPrisoner1() {
+    getKeyFromFile().let { key ->
+        getBoardFromFile().let { board ->
+            board.parity().apply { xor(key.toBitSet()) }.toInt().let { flip ->
+                board.flip(flip)
+                saveBoardToFile(board)
+                println("Prisoner 1 flipped coin $flip")
+            }
+        }
+    }
+}
+
+fun actionPrisoner2() {
+    getBoardFromFile().parity().toInt().let { key ->
+        println("Prisoner 2 guesses that key is at position $key")
+    }
 }
 
 fun getBoardFromFile(): BitSet =
@@ -25,27 +46,16 @@ fun getBoardFromFile(): BitSet =
         }
     }
 
-fun getRandomBoard() = IntArray(n) { it }.filter { Random().nextBoolean() }.toIntArray().toBitSet()
+fun saveBoardToFile(board: BitSet) {
+    File("src/main/resources/board.txt").writeText(
+        (0 until n).mapIndexed { index, bit ->
+            (if (board.get(bit)) "1" else "0") + (if ((index + 1) % sqrt(n.toDouble()).toInt() == 0) "\n" else "")
+        }.joinToString("")
+    )
+}
 
 fun getKeyFromFile(): Int =
     object {}.javaClass.getResource("key.txt").readText().replace("\n", "").toInt()
-
-fun actionPrisoner1(board: BitSet, key: Int) {
-    val parity = board.parity()
-    val diff = parity.copy().apply { xor(key.toBitSet()) }
-    val flipped = diff.toInt()
-    board.flip(flipped)
-    println("Prisoner 1 flipped coin $flipped")
-}
-
-fun actionPrisoner2(board: BitSet) = board.parity().toInt()
-
-fun pow2(exp: Int) = 2.0.pow(exp).toInt()
-
-fun log2(x: Int) = x.let {
-    if (!it.isPowerOfTwo()) throw IllegalArgumentException("$it should be power of two")
-    kotlin.math.log2(it.toDouble()).toInt()
-}
 
 fun Int.isPowerOfTwo() = (this and (this - 1)) == 0
 
@@ -92,4 +102,11 @@ fun BitSet.parity(): BitSet {
         }
     }
     return result
+}
+
+fun pow2(exp: Int) = 2.0.pow(exp).toInt()
+
+fun log2(x: Int) = x.let {
+    if (!it.isPowerOfTwo()) throw IllegalArgumentException("$it should be power of two")
+    kotlin.math.log2(it.toDouble()).toInt()
 }
