@@ -58,19 +58,19 @@ fun Int.isPowerOfTwo() = (this and (this - 1)) == 0
 
 fun Int.isInRegion(region: Int) = toBitSet().get(region)
 
-fun Int.toBitSet(): BitSet {
-    val result = BitSet()
-    var index = 0
-    var value = this
-    while (value != 0) {
-        if (value % 2 != 0) {
-            result.set(index)
+fun Int.toBitSet(): BitSet =
+    BitSet().let {
+        var index = 0
+        var value = this
+        while (value != 0) {
+            if (value % 2 != 0) {
+                it.set(index)
+            }
+            index++
+            value = value shr 1
         }
-        index++
-        value = value shr 1
+        it
     }
-    return result
-}
 
 fun IntArray.toBitSet() =
     BitSet(size).apply {
