@@ -1,12 +1,19 @@
 # Impossible Escape
 
-To solve the Impossible Escape puzzle (explained in [this video](https://youtu.be/wTJI_WuZSwE)), I implemented a graph coloring algorithm in Kotlin.
+To solve the Impossible Escape puzzle (explained in [this video](https://youtu.be/wTJI_WuZSwE)) and [this article](https://datagenetics.com/blog/december12014/index.html), I implemented an algorithm in Kotlin.
 
 #### Goals
-* Improve my skills of Kotlin, functional programming and graph theory
+* Improve my skills of Kotlin and functional programming
 * Have fun
 
-#### How it works
+#### Process
+I first created an overcomplicated algorithm that colored a graph in such a way that it could tell from each possible board state which coin to flip. Then I finished watching the YouTube video and understood this problem can be solved way easier. I replaced the old code, but this can still be found in previous commits. However, the old algorithm only works for smaller boards (4x4) because the graph grows astronomically, making it infeasible to generate the graph before the world ends, or store the vertices in an array.
+
+#### How the new algorithm works
+As the abovementioned references do a way better job explaining how the algorithm works conceptually, I am not going to burn my hands on that. What I can say is that I tried to write the code as functional as possible and avoid using variables. I stored both the board state and the parity in a BitSet. For convenience, I wrote a function to map an IntArray to a BitSet, so I could quickly define them (often used in the [tests](https://github.com/danielmast/impossible_escape/blob/main/src/test/kotlin/MainTest.kt)). When using the code to solve the puzzle, the board state has to be filled in a text file, as shown in the [example](https://github.com/danielmast/impossible_escape/blob/main/src/main/resources/board.txt.example). The same goes for the location of the key, and which prisoner is up (letting both prisoner 1 and 2 do their job requires running the algorithm twice). So the code itself does not have to be changed. After prisoner 1 has done its job, the board file is overwritten, to mimic the physical scenario, in which prisoner 2 cannot retrieve which coin was flipped by prisoner 1.
+
+#### How the old algorithm works
+
 The algorithm constructs a graph and colors all the vertices. 
 
 Properties of the graph:
